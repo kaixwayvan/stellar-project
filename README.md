@@ -30,3 +30,15 @@ The vision for BaonLock is to promote financial literacy and responsible spendin
 To compile the contract to a WASM file:
 ```bash
 soroban contract build
+```
+
+## Smart Contract
+
+Deployed on Stellar testnet:
+```
+CDRUGSEITRGD3QE5AQOTVJB3PLYK2MQCULKV7O6MAI23C6SWSGQKFZCA
+```
+
+Explorer: https://stellar.expert/explorer/testnet/contract/CDRUGSEITRGD3QE5AQOTVJB3PLYK2MQCULKV7O6MAI23C6SWSGQKFZCA
+
+<img width="1918" height="1032" alt="Image" src="https://github.com/user-attachments/assets/04ccb874-c4bb-4519-b54d-7b8e454cf6ea" />
