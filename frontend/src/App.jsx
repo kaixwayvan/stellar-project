@@ -1,113 +1,95 @@
-import { useState, useEffect } from 'react'
-import { connectWallet, depositBaon } from './stellar'
+import { useState, useEffect } from "react";
+import Navbar from "./components/Layout/Navbar";
+import DashboardView from "./components/Dashboard/DashboardView";
+import CreateEscrow from "./components/Create/EscrowForm";
+import EscrowDetail from "./components/Details/EscrowDetail";
+import HistoryView from "./components/History/HistoryView";
+import HeroPage from "./components/Landing/HeroPage";
+import { getBalance } from "./stellar/stellar";
 
 function App() {
-  const [address, setAddress] = useState('')
-  const [status, setStatus] = useState('')
-  const [loading, setLoading] = useState(false) // Track connection state
-  const [form, setForm] = useState({ student: '', amount: '', date: '' })
+  const [address, setAddress] = useState("");
+  const [balance, setBalance] = useState("0.00");
+  const [view, setView] = useState("dashboard");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleConnect = async () => {
-    setStatus("⌛ Detecting Freighter...");
-    setLoading(true);
-    
-    try {
-      const addr = await connectWallet();
-      if (addr) {
-        setAddress(addr);
-        setStatus("✅ Wallet Connected!");
-      } else {
-        setStatus("❌ Connection cancelled or timed out.");
-      }
-    } catch (err) {
-      console.error("Critical Connection Error:", err);
-      // Give the user a hint about the browser settings we discussed
-      setStatus("❌ " + err.message);
-    } finally {
-      setLoading(false);
+  const [escrowList, setEscrowList] = useState([
+    { id: "8291", recipientName: "Account 2", amount: 10, status: "Pending" },
+    { id: "8288", recipientName: "Student B", amount: 50, status: "Released" },
+  ]);
+
+  useEffect(() => {
+    if (address) {
+      getBalance(address).then((bal) => setBalance(bal));
     }
+  }, [address]);
+
+  // 1. If no wallet, show HeroPage
+  if (!address) {
+    return (
+      <HeroPage
+        onConnect={(addr) => setAddress(addr)}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+      />
+    );
   }
 
-  const handleDeposit = async (e) => {
-    e.preventDefault();
-    setStatus('⌛ Sending to Stellar...');
+  const handleConnect = async (addr) => {
+    setAddress(addr);
+    // Fetch real balance from Stellar
     try {
-      const unixTime = Math.floor(new Date(form.date).getTime() / 1000);
-      
-      // Pass the 'address' (parent) as the sender to match your contract logic
-      await depositBaon(address, form.student, form.amount, unixTime);
-      
-      setStatus('✅ Success! Funds Locked.');
-    } catch (err) {
-      setStatus('❌ Error: ' + err.message);
+      const bal = await getBalance(addr);
+      setBalance(bal);
+    } catch (e) {
+      console.error("Balance fetch failed", e);
     }
+  };
+
+  if (!address) {
+    return <HeroPage onConnect={handleConnect} />;
   }
 
+  // 2. Main App Layout
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', textAlign: 'left', fontFamily: 'sans-serif' }}>
-      <h1>🍱 BaonLock</h1>
-      <p>Secure Student Allowances</p>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#000",
+        color: "#fff",
+        fontFamily: "sans-serif",
+      }}
+    >
+      <Navbar address={address} currentView={view} setView={setView} />
 
-      {address ? (
-        <div style={{ padding: '10px', backgroundColor: '#e6fffa', borderRadius: '8px' }}>
-            <p style={{ color: '#2c7a7b', margin: 0 }}>
-                <strong>Connected:</strong> {address.slice(0,6)}...{address.slice(-6)}
-            </p>
-        </div>
-      ) : (
-        <button 
-            onClick={handleConnect} 
-            disabled={loading}
-            style={{ width: '100%', padding: '10px', cursor: loading ? 'not-allowed' : 'pointer' }}
-        >
-          {loading ? "Connecting..." : "Connect Wallet"}
-        </button>
-      )}
+      <main style={{ maxWidth: "1000px", margin: "0 auto", padding: "2rem" }}>
+        <header style={{ marginBottom: "2rem" }}>
+          <h1 style={{ fontSize: "1.8rem", margin: 0 }}>Welcome back,</h1>
+          <p style={{ color: "#4A90E2", fontWeight: "bold", margin: "5px 0" }}>
+            {address.slice(0, 8)}...{address.slice(-6)}
+          </p>
+        </header>
 
-      <hr style={{ margin: '1.5rem 0', opacity: 0.2 }} />
-
-      <form onSubmit={handleDeposit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <label>Student Wallet</label>
-        <input type="text" placeholder="G..." 
-          onChange={e => setForm({...form, student: e.target.value})} required />
-        
-        <label>Total Allowance (XLM)</label>
-        <input type="number" placeholder="100" 
-          onChange={e => setForm({...form, amount: e.target.value})} required />
-        
-        <label>Unlock Date & Time</label>
-        <input type="datetime-local" 
-          onChange={e => setForm({...form, date: e.target.value})} required />
-
-        <button 
-            type="submit" 
-            disabled={!address}
-            style={{ 
-                padding: '12px', 
-                backgroundColor: address ? '#4A90E2' : '#ccc', 
-                color: 'white',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: address ? 'pointer' : 'not-allowed'
-            }}
-        >
-          Lock Allowance
-        </button>
-      </form>
-
-      {status && (
-        <div style={{ 
-            marginTop: '1rem', 
-            padding: '10px', 
-            fontSize: '0.9rem',
-            borderLeft: '4px solid #333',
-            backgroundColor: '#f9f9f9'
-        }}>
-            {status}
-        </div>
-      )}
+        {/* Fix the component names here to match your imports */}
+        {view === "dashboard" && (
+          <DashboardView
+            balance={balance}
+            address={address}
+            escrowList={escrowList}
+            setView={setView}
+          />
+        )}
+        {view === "create" && <CreateEscrow />}
+        {view === "history" && <HistoryView />}
+        {view === "detail" && (
+          <EscrowDetail 
+            escrow={selectedEscrow} 
+            onBack={() => setView("dashboard")} 
+          />
+        )}
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
