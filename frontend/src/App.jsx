@@ -12,6 +12,7 @@ function App() {
   const [balance, setBalance] = useState("0.00");
   const [view, setView] = useState("dashboard");
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedEscrow, setSelectedEscrow] = useState(null);
 
   const [escrowList, setEscrowList] = useState([
     { id: "8291", recipientName: "Account 2", amount: 10, status: "Pending" },
@@ -20,32 +21,43 @@ function App() {
 
   useEffect(() => {
     if (address) {
-      getBalance(address).then((bal) => setBalance(bal));
+      fetchBalance();
     }
   }, [address]);
 
-  if (!address) {
-    return (
-      <HeroPage
-        onConnect={(addr) => setAddress(addr)}
-        isLoading={isLoading}
-        setIsLoading={setIsLoading}
-      />
-    );
-  }
-
-  const handleConnect = async (addr) => {
-    setAddress(addr);
+  const fetchBalance = async () => {
     try {
-      const bal = await getBalance(addr);
+      const bal = await getBalance(address);
       setBalance(bal);
     } catch (e) {
       console.error("Balance fetch failed", e);
     }
   };
 
+  const handleSelectEscrow = (escrow) => {
+    setSelectedEscrow(escrow);
+    setView("detail"); // Changed from dashboard to detail to actually view the item
+  };
+
+  const handleAddEscrow = (newEscrow) => {
+    setEscrowList((prev) => [newEscrow, ...prev]);
+    fetchBalance(); // Refresh balance after transaction
+    setView("dashboard");
+  };
+
+  const handleConnect = async (addr) => {
+    setAddress(addr);
+    setIsLoading(false);
+  };
+
   if (!address) {
-    return <HeroPage onConnect={handleConnect} />;
+    return (
+      <HeroPage
+        onConnect={handleConnect}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+      />
+    );
   }
 
   return (
@@ -66,14 +78,22 @@ function App() {
             address={address}
             escrowList={escrowList}
             setView={setView}
+            onSelectEscrow={handleSelectEscrow}
           />
         )}
-        {view === "create" && <CreateEscrow />}
-        {view === "history" && <HistoryView />}
+        {view === "create" && (
+          <CreateEscrow onAddEscrow={handleAddEscrow} address={address} />
+        )}
+        {view === "history" && (
+          <HistoryView
+            selectedEscrow={selectedEscrow}
+            escrowList={escrowList}
+          />
+        )}
         {view === "detail" && (
-          <EscrowDetail 
-            escrow={selectedEscrow} 
-            onBack={() => setView("dashboard")} 
+          <EscrowDetail
+            escrow={selectedEscrow}
+            onBack={() => setView("dashboard")}
           />
         )}
       </main>
