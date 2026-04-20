@@ -24,7 +24,6 @@ function App() {
     }
   }, [address]);
 
-  // 1. If no wallet, show HeroPage
   if (!address) {
     return (
       <HeroPage
@@ -37,7 +36,6 @@ function App() {
 
   const handleConnect = async (addr) => {
     setAddress(addr);
-    // Fetch real balance from Stellar
     try {
       const bal = await getBalance(addr);
       setBalance(bal);
@@ -50,7 +48,6 @@ function App() {
     return <HeroPage onConnect={handleConnect} />;
   }
 
-  // 2. Main App Layout
   return (
     <div
       style={{
@@ -63,14 +60,6 @@ function App() {
       <Navbar address={address} currentView={view} setView={setView} />
 
       <main style={{ maxWidth: "1000px", margin: "0 auto", padding: "2rem" }}>
-        <header style={{ marginBottom: "2rem" }}>
-          <h1 style={{ fontSize: "1.8rem", margin: 0 }}>Welcome back,</h1>
-          <p style={{ color: "#4A90E2", fontWeight: "bold", margin: "5px 0" }}>
-            {address.slice(0, 8)}...{address.slice(-6)}
-          </p>
-        </header>
-
-        {/* Fix the component names here to match your imports */}
         {view === "dashboard" && (
           <DashboardView
             balance={balance}

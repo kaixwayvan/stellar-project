@@ -23,7 +23,7 @@ export default function HeroPage({ onConnect, isLoading, setIsLoading }) {
 
       <nav style={{ ...contentWrapper, ...navStyle }}>
         <div style={logoStyle}>
-          Baon<span style={{ fontWeight: "200", color: "#4A90E2" }}>Luck</span>
+          Baon<span style={{ fontWeight: "200", color: "#4A90E2" }}>Lock</span>
         </div>
         <div
           style={{
