@@ -61,7 +61,6 @@ export default function HeroPage({ onConnect, isLoading, setIsLoading }) {
         </button>
       </section>
 
-      {/* Steps Section */}
       <div style={gridStyle}>
         {[
           {

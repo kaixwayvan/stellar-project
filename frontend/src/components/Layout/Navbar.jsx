@@ -40,15 +40,16 @@ export default function Navbar({ address, currentView, setView }) {
   );
 }
 
+// --- Style Variables ---
+
 const gradientOverlayStyle = {
   position: "sticky",
   top: 0,
   zIndex: 1000,
   width: "100%",
-  /* The gradient stays fixed at the very top */
   background:
     "linear-gradient(to bottom, #050505 0%, rgba(5,5,5,0.8) 70%, transparent 100%)",
-  pointerEvents: "none", // Allows clicks to pass through to the dashboard below
+  pointerEvents: "none",
 };
 
 const navWrapperStyle = {
@@ -74,7 +75,7 @@ const navBarStyle = {
   border: "1px solid rgba(255,255,255,0.08)",
   width: "100%",
   maxWidth: "1100px",
-  pointerEvents: "auto", // Re-enables clicks for buttons inside the nav
+  pointerEvents: "auto",
   boxShadow: "0 4px 30px rgba(0, 0, 0, 0.2)",
   boxSizing: "border-box",
 };

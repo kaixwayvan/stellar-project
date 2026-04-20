@@ -143,7 +143,7 @@ export default function DashboardView({
   );
 }
 
-// --- STYLES ---
+// --- Style Variables ---
 
 const containerStyle = {
   backgroundColor: "#050505",
