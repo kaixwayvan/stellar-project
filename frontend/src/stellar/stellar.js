@@ -1,4 +1,4 @@
-import * as BaonLock from "baonlock";
+import * as BaonLock from "./baonlock-logic.js";
 import { isConnected, getAddress, setAllowed, signTransaction } from "@stellar/freighter-api";
 
 export const client = new BaonLock.Client({
