@@ -9,7 +9,6 @@ export default function HistoryView({ selectedEscrow, escrowList = [] }) {
       <div style={containerStyle}>
         <h3 style={sectionTitleStyle}>ACTIVITY LOG</h3>
 
-        {/* Dynamic Mapping of all transactions */}
         {escrowList.map((escrow) => (
           <div key={escrow.id} style={individualLogTile}>
             <div style={logTextWrapper}>
@@ -20,7 +19,6 @@ export default function HistoryView({ selectedEscrow, escrowList = [] }) {
           </div>
         ))}
 
-        {/* Fallback items */}
         <div style={{ ...individualLogTile, opacity: 0.6 }}>
           <div style={logTextWrapper}>
             <strong style={logTitleStyle}>Wallet Connected</strong>
@@ -103,7 +101,7 @@ export default function HistoryView({ selectedEscrow, escrowList = [] }) {
   );
 }
 
-// --- Styles Variables (Exactly as provided) ---
+// --- Styles Variables ---
 const containerStyle = {
   width: "100%",
   maxWidth: "1100px",

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-// Assuming you have freighter integration in your stellar file
-// import { signTransaction } from "@stellar/freighter-api"; 
+import { isConnected, signTransaction } from "@stellar/freighter-api";
+import { depositBaon } from "../../stellar/stellar";
 
 export default function EscrowForm({ onAddEscrow, address }) {
   const [recipient, setRecipient] = useState("");
@@ -12,47 +12,39 @@ export default function EscrowForm({ onAddEscrow, address }) {
   const total = amt ? Number(amt) + fee : 0;
 
   const handleInitialize = async () => {
-    if (!recipient || !amt || !releaseDate) {
-      alert("Missing parameters: Ensure recipient, amount, and release date are set.");
-      return;
-    }
-
-    if (recipient.length < 56 || !recipient.startsWith("G")) {
-      alert("Please enter a valid Stellar Address (starting with G).");
-      return;
-    }
+    if (!recipient || !amt || !releaseDate) return alert("Fill all fields");
+    if (!(await isConnected())) return alert("Connect Freighter");
 
     setIsProcessing(true);
 
+    const newEscrow = {
+      id: Math.floor(Math.random() * 10000).toString(),
+      recipientName: recipient.slice(0, 6) + "...",
+      fullRecipient: recipient,
+      amount: Number(amt),
+      status: "Confirmed",
+      releaseDate: releaseDate,
+    };
+
     try {
-      // In a real Soroban setup, you would:
-      // 1. Prepare the transaction for the smart contract
-      // 2. Request signature from Freighter
-      // 3. Submit to the network
-      
-      console.log("Contacting Freighter for address:", address);
-      
-      // Simulate transaction delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const amountRaw = BigInt(Math.floor(Number(amt) * 10000000));
+
+      console.log("Depositing for student:", recipient);
+      await depositBaon(address, recipient, amountRaw, amountRaw);
 
       const newEscrow = {
         id: Math.floor(Math.random() * 10000).toString(),
-        recipientName: recipient.slice(0, 6) + "..." + recipient.slice(-4),
-        fullRecipient: recipient,
+        recipientName: recipient.slice(0, 6) + "...",
         amount: Number(amt),
-        fee: fee,
-        total: total,
-        status: "Confirmed", 
-        timestamp: new Date().toLocaleString(),
+        status: "Confirmed",
         releaseDate: releaseDate,
       };
 
       onAddEscrow(newEscrow);
-      alert(`Protocol Initialized: ${amt} USDC secured for ${newEscrow.recipientName}`);
-      
+      alert("Deposit Successful!");
     } catch (error) {
-      console.error("Freighter transaction failed", error);
-      alert("Transaction declined or failed.");
+      console.error("Deposit Error:", error);
+      alert("Deposit failed: " + error.message);
     } finally {
       setIsProcessing(false);
     }
@@ -112,16 +104,18 @@ export default function EscrowForm({ onAddEscrow, address }) {
             </div>
           </div>
 
-          <button 
-            onClick={handleInitialize} 
+          <button
+            onClick={handleInitialize}
             disabled={isProcessing}
             style={{
               ...actionButtonStyle,
               opacity: isProcessing ? 0.6 : 1,
-              cursor: isProcessing ? "not-allowed" : "pointer"
+              cursor: isProcessing ? "not-allowed" : "pointer",
             }}
           >
-            {isProcessing ? "SIGNING WITH FREIGHTER..." : "CONFIRM & INITIALIZE ESCROW ↘"}
+            {isProcessing
+              ? "AWAITING WALLET SIGNATURE..."
+              : "CONFIRM & INITIALIZE ESCROW ↘"}
           </button>
         </div>
       </div>

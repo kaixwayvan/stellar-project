@@ -15,7 +15,7 @@ function App() {
   const [selectedEscrow, setSelectedEscrow] = useState(null);
 
   const [escrowList, setEscrowList] = useState([
-    { id: "8291", recipientName: "Account 2", amount: 10, status: "Pending" },
+    { id: "8291", recipientName: "Student A", fullRecipient: "GCW5IIZZYSP7CAACKHBVG35ATGBJ2ZRU55AKNU6IO5AO6HN7WOHO4XZW", amount: 10, status: "Pending" },
     { id: "8288", recipientName: "Student B", amount: 50, status: "Released" },
   ]);
 
@@ -34,26 +34,21 @@ function App() {
     }
   };
 
-  const handleSelectEscrow = (escrow) => {
-    setSelectedEscrow(escrow);
-    setView("detail"); // Changed from dashboard to detail to actually view the item
-  };
-
   const handleAddEscrow = (newEscrow) => {
     setEscrowList((prev) => [newEscrow, ...prev]);
-    fetchBalance(); // Refresh balance after transaction
+    fetchBalance();
     setView("dashboard");
   };
 
-  const handleConnect = async (addr) => {
-    setAddress(addr);
-    setIsLoading(false);
+  const handleSelectEscrow = (escrow) => {
+    setSelectedEscrow(escrow);
+    setView("detail");
   };
 
   if (!address) {
     return (
       <HeroPage
-        onConnect={handleConnect}
+        onConnect={(addr) => setAddress(addr)}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
       />
@@ -70,7 +65,6 @@ function App() {
       }}
     >
       <Navbar address={address} currentView={view} setView={setView} />
-
       <main style={{ maxWidth: "1000px", margin: "0 auto", padding: "2rem" }}>
         {view === "dashboard" && (
           <DashboardView
@@ -93,6 +87,7 @@ function App() {
         {view === "detail" && (
           <EscrowDetail
             escrow={selectedEscrow}
+            address={address}
             onBack={() => setView("dashboard")}
           />
         )}

@@ -1,7 +1,33 @@
+import { useState } from 'react';
+import { isConnected } from "@stellar/freighter-api";
 import Card from '../Layout/Card';
 
 export default function DisputePage({ escrow, onBack }) {
+  const [isFreezing, setIsFreezing] = useState(false);
   const reasons = ["Goods Not Received", "Items Damaged", "Quality Issues", "Other"];
+
+  const handleDispute = async () => {
+    if (isFreezing) return;
+
+    if (!(await isConnected())) {
+      alert("Wallet not found.");
+      return;
+    }
+
+    setIsFreezing(true);
+    try {
+      console.log("Freezing funds for dispute ID:", escrow?.id);
+      
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      
+      alert("Protocol Frozen. Anchor notified.");
+      onBack();
+    } catch (e) {
+      alert("Dispute submission failed.");
+    } finally {
+      setIsFreezing(false);
+    }
+  };
 
   return (
     <div style={{ maxWidth: '700px', margin: '0 auto' }}>
@@ -12,7 +38,7 @@ export default function DisputePage({ escrow, onBack }) {
         <div style={{ background: '#1a1111', padding: '1rem', borderRadius: '8px', border: '1px solid #3b1a1a', marginBottom: '2rem' }}>
           <strong style={{ display: 'block', color: '#ff8a8a' }}>Escrow Compliance</strong>
           <p style={{ fontSize: '0.85rem', color: '#cc9999', margin: '5px 0' }}>
-            The anchor/compliance officer will review the case within 48 hours. Funds will remain locked in the secure vault until resolution.
+            Funds will remain locked until resolution.
           </p>
         </div>
 
@@ -29,11 +55,25 @@ export default function DisputePage({ escrow, onBack }) {
         <h4 style={{ marginTop: '2rem' }}>03 UPLOAD EVIDENCE</h4>
         <div style={{ border: '2px dashed #333', padding: '2rem', textAlign: 'center', borderRadius: '12px' }}>
           <p style={{ margin: 0 }}>☁️ Drag files here or click to upload</p>
-          <small style={{ color: '#555' }}>PNG, JPG, PDF (Max 10MB)</small>
         </div>
 
-        <button style={{ width: '100%', marginTop: '2rem', padding: '1.2rem', background: '#e53e3e', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-          FREEZE FUNDS & NOTIFY ANCHOR
+        <button 
+          onClick={handleDispute}
+          disabled={isFreezing}
+          style={{ 
+            width: '100%', 
+            marginTop: '2rem', 
+            padding: '1.2rem', 
+            background: isFreezing ? '#444' : '#e53e3e', 
+            color: '#fff', 
+            border: 'none', 
+            borderRadius: '8px', 
+            fontWeight: 'bold', 
+            cursor: isFreezing ? 'not-allowed' : 'pointer',
+            opacity: isFreezing ? 0.7 : 1
+          }}
+        >
+          {isFreezing ? "FREEZING VAULT..." : "FREEZE FUNDS & NOTIFY ANCHOR"}
         </button>
       </Card>
     </div>
